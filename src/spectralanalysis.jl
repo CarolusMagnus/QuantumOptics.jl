@@ -1,4 +1,5 @@
 using Arpack
+using LinearMap
 
 const nonhermitian_warning = "The given operator is not hermitian. If this is due to a numerical error make the operator hermitian first by calculating (x+dagger(x))/2 first."
 
@@ -53,6 +54,26 @@ function eigenstates(op::SparseOpType, n::Int=6; warning::Bool=true,
     D, states
 end
 
+"""
+For custom operators by default it only returns the 6 lowest eigenvalues. For the
+operator `mul!` as well as `issymmetric` ans `ishermitian` have to be implemented.
+"""
+function eigenstates(op::AbstractOperator, n::Int=6; warning::Bool=true,
+    info::Bool=true, kwargs...)
+    b = basis(op)
+    ishermitian(op) || (warning && @warn(nonhermitian_warning))
+    info && println("INFO: Defaulting to sparse diagonalization.
+    If storing the full operator is possible, it might be faster to do
+    eigenstates(dense(op)). Set info=false to turn off this message.")
+    
+    f = (result, x, α=true, β=false)->mul!(Ket(ℬ,result), op, Ket(ℬ, x), α, β) 
+    ℒ = LinearMap(f, length(b), issymmetric=issymmetric(op), ishermitian=ishermitian(op))
+    
+    D, V = eigs(ℒ; which=:SR, nev=n, kwargs...)
+    states = [Ket(b, V[:, k]) for k=1:length(D)]
+    D, states
+end
+
 
 """
     eigenenergies(op::AbstractOperator[, n::Int; warning=true])
@@ -85,10 +106,25 @@ For sparse operators by default it only returns the 6 lowest eigenvalues.
 """
 eigenenergies(op::SparseOpType, n::Int=6; kwargs...) = eigenstates(op, n; kwargs...)[1]
 
+"""
+For custom operators by default it only returns the 6 lowest eigenvalues. For the
+operator `mul!` as well as `issymmetric` ans `ishermitian` have to be implemented.
+"""
+function eigenenergies(op::AbstractOperator, n::Int=6; warning::Bool=true,
+    info::Bool=true, kwargs...)
+    b = basis(op)
+    ishermitian(op) || (warning && @warn(nonhermitian_warning))
+    info && println("INFO: Defaulting to sparse diagonalization.
+    If storing the full operator is possible, it might be faster to do
+    eigenenergies(dense(op)). Set info=false to turn off this message.")
+    
+    f = (result, x, α=true, β=false)->mul!(Ket(ℬ,result), op, Ket(ℬ, x), α, β) 
+    ℒ = LinearMap(f, length(b), issymmetric=issymmetric(op), ishermitian=ishermitian(op))
+    
+    D, x = eigs(ℒ; which=:SR, nev=n, ritzvec=false,kwargs...)
+    D
+end
 
-arithmetic_unary_error = QuantumOpticsBase.arithmetic_unary_error
-eigenstates(op::AbstractOperator, n::Int=0) = arithmetic_unary_error("eigenstates", op)
-eigenenergies(op::AbstractOperator, n::Int=0) = arithmetic_unary_error("eigenenergies", op)
 
 
 """
