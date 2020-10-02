@@ -3,7 +3,6 @@ uuid = "6e0679c1-51ea-5a7c-ac74-d61b76210b0c"
 version = "v0.8.2"
 
 [deps]
-QuantumOpticsBase = "4f57444f-1401-5e15-980d-4471b28d5678"
 Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
 DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def"
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
