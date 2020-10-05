@@ -1,5 +1,5 @@
 using Arpack
-using LinearMaps
+import LinearMaps: LinearMap
 
 const nonhermitian_warning = "The given operator is not hermitian. If this is due to a numerical error make the operator hermitian first by calculating (x+dagger(x))/2 first."
 
@@ -118,7 +118,7 @@ function eigenenergies(op::AbstractOperator, n::Int=6; warning::Bool=true,
     If storing the full operator is possible, it might be faster to do
     eigenenergies(dense(op)). Set info=false to turn off this message.")
     
-    f = (result, x, α=true, β=false)->mul!(Ket(ℬ,result), op, Ket(ℬ, x), α, β) 
+    f = (result, x, α=true, β=false)->mul!(Ket(b,result), op, Ket(b, x), α, β) 
     ℒ = LinearMap(f, length(b), issymmetric=issymmetric(op), ishermitian=ishermitian(op))
     
     D, x = eigs(ℒ; which=:SR, nev=n, ritzvec=false,kwargs...)
