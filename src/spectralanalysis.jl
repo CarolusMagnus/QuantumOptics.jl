@@ -121,8 +121,17 @@ function eigenenergies(op::AbstractOperator, n::Int=6; warning::Bool=true,
     f = (result, x, α=true, β=false)->mul!(Ket(b,result), op, Ket(b, x), α, β) 
     ℒ = LinearMap(f, length(b), issymmetric=issymmetric(op), ishermitian=ishermitian(op))
     
-    D, x = eigs(ℒ; which=:SR, nev=n, ritzvec=false,kwargs...)
-    D
+    D, nconv, x = eigs(ℒ; which=:SR, nev=n, ritzvec=false,kwargs...)
+
+    if nconv < n
+        prinln("Only $nconv of $n eigenvalues converged")
+    end
+    
+    E = zeros(n)
+
+    E[1:nconv] = D
+    E[nconv+1:n] = NaN
+    E
 end
 
 
