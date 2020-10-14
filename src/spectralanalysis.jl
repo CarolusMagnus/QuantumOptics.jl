@@ -130,7 +130,7 @@ function eigenenergies(op::AbstractOperator, n::Int=6; warning::Bool=true,
     E = zeros(n)
 
     E[1:nconv] = D
-    E[nconv+1:n] = NaN
+    E[nconv+1:n] .= NaN
     E
 end
 
