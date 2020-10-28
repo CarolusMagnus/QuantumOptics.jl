@@ -127,7 +127,6 @@ function eigenenergies(op::AbstractOperator, n::Int=6; warning::Bool=true,
     try 
         D, nconv, x = eigs(ℒ; which=:SR, nev=n, ritzvec=false,kwargs...)
     catch   e
-        @show e
         if e isa Arpack.ARPACKException && e.info == 1
             nconv = 0
             D = []
