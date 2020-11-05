@@ -67,7 +67,7 @@ function eigenstates(op::AbstractOperator, n::Int=6; warning::Bool=true,
     If storing the full operator is possible, it might be faster to do
     eigenstates(dense(op)). Set info=false to turn off this message.")
     
-    f = (result, x, α=true, β=false)->mul!(Ket(ℬ,result), op, Ket(ℬ, x), α, β) 
+    f = (result, x, α=true, β=false)->mul!(Ket(b,result), op, Ket(b, x), α, β) 
     ℒ = LinearMap(f, length(b), issymmetric=issymmetric(op), ishermitian=ishermitian(op))
     
     D, V = eigs(ℒ; which=:SR, nev=n, kwargs...)
@@ -184,7 +184,8 @@ function simdiag(ops::Vector{T}; atol::Real=1e-14, rtol::Real=1e-14) where T<:De
         vec = ops[i].data*v[:, j]
         evals[i][j] = (v[:, j]'*vec)[1]
         if !isapprox(vec, evals[i][j]*v[:, j]; atol=atol, rtol=rtol)
-            error("Simultaneous diagonalization failed!")
+            δ = norm(vec -  evals[i][j]*v[:, j])
+            error("Simultaneous diagonalization failed in step $(i)! (δ=$δ)")
         end
     end
 
